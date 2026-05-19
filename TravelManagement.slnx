@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/TravelManagementTests/">
+    <Project Path="TravelManagementTests/TravelManagementTest.csproj" />
+  </Folder>
   <Project Path="mvc_project/mvc_project.csproj" />
   <Project Path="TestingConsole/TestingConsole.csproj" />
 </Solution>

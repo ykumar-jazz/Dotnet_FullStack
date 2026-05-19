@@ -1,16 +1,21 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using mvc_project.EMS.Application.Services;
 using mvc_project.EMS.Domain.Entities;
+using mvc_project.EMS.Web.Hubs;
 using X.PagedList.Extensions;
 
 namespace mvc_project.Controllers;
-
+//[Authorize(Roles ="Admin")]
 public class EmployeeController:Controller
 {
     public readonly EmployeeService _service;
-    public EmployeeController(EmployeeService service)
+    private readonly IHubContext<NotificationHub> _hubContext;
+    public EmployeeController(EmployeeService service,IHubContext<NotificationHub> hubContext)
     {
         _service=service;
+        _hubContext=hubContext;
     }
     public async Task<IActionResult> Index(
         string search,
@@ -27,19 +32,20 @@ public class EmployeeController:Controller
                 .ToList();
         }
 
-        int pageSize = 5;
+        int pageSize = 2;
 
         return View(
             employees.ToPagedList(page,
                                   pageSize));
     }
-
+    [Authorize(Roles = "Admin")]
     public IActionResult Create()
     {
         return View();
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
         Employee employee,
@@ -69,6 +75,7 @@ public class EmployeeController:Controller
         }
 
         await _service.AddAsync(employee);
+        await _hubContext.Clients.All.SendAsync("ReceiveNotification","New Employee Added");
 
         return RedirectToAction(nameof(Index));
     }

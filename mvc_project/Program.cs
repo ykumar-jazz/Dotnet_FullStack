@@ -5,9 +5,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using mvc_project.EMS.Infrastructure.Data;
 using mvc_project.EMS.Application.Interfaces;
-using mvc_projectEMS.Infrastructure.Repositories;
+using mvc_project.EMS.Infrastructure.Repositories;
 using mvc_project.EMS.Application.Services;
 using mvc_project.EMS.Web.Hubs;
+using mvc_project.Middelwares;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +31,8 @@ CookieAuthenticationDefaults.AuthenticationScheme)
 .AddCookie(options =>
 {
     options.LoginPath = "/Account/Login";
+    options.ExpireTimeSpan =
+            TimeSpan.FromMinutes(1);
 });
 
 builder.Services.AddAuthorization();
@@ -81,14 +85,14 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
+app.UseMiddleware<CheckPublicPath>();
 app.UseAuthorization();
 app.UseSession();
-app.MapHub<NotificationHub>("/notify");
+app.MapHub<NotificationHub>("/notificationHub");
 app.MapStaticAssets();
 
 app.MapControllerRoute(

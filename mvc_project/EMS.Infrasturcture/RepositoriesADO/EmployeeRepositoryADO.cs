@@ -2,7 +2,7 @@ using Microsoft.Data.SqlClient;
 using mvc_project.EMS.Application.Interfaces;
 using mvc_project.EMS.Domain.Entities;
 
-namespace mvc_project.Repositories;
+namespace mvc_project.EMS.Infrastructure.Repositories;
 
 public class EmployeeRepositoryADO : IEmployeeRepository
 {

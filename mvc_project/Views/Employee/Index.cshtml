@@ -1,6 +1,14 @@
 @model X.PagedList.IPagedList<mvc_project.EMS.Domain.Entities.Employee>
-
+@using System.Security.Claims;
 @using X.PagedList.Mvc.Core
+
+<input type="text" id="message" />
+
+<button onclick="sendMessage()">
+    Send
+</button>
+
+<ul id="messages"></ul>
 
 <form method="get">
     <input type="text"
@@ -11,11 +19,13 @@
         Search
     </button>
 </form>
-
+@if(User.HasClaim(ClaimTypes.Role,"Admin"))
+{
 <a asp-action="Create"
-       class="btn btn-primary">
+   class="btn btn-primary">
     Add Employee
 </a>
+}
 
 <table class="table">
     <thead>
@@ -27,7 +37,7 @@
     </thead>
 
     <tbody>
-        @foreach (var item in Model)
+        @foreach(var item in Model)
         {
             <tr>
                 <td>@item.Name</td>

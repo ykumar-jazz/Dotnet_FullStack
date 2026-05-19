@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using mvc_project.EMS.Domain.Entities;
 using mvc_project.EMS.Infrastructure.Data;
@@ -7,9 +8,9 @@ using mvc_project.Models;
 using System.Security.Claims;
 namespace mvc_project.EMS.Web.Controllers;
 
-public class AccountController:Controller
+public class AccountController : Controller
 {
-     private readonly AppDbContext _context;
+    private readonly AppDbContext _context;
 
     public AccountController(AppDbContext context)
     {
@@ -18,20 +19,29 @@ public class AccountController:Controller
 
     public IActionResult Login()
     {
+        if (User.Identity.IsAuthenticated)
+        {
+            if (User.IsInRole("Admin")) //if (User.HasClaim(ClaimTypes.Role, "Admin"))
+            {
+                return RedirectToAction("Index", "Employee");
+            }
+
+            return RedirectToAction("Privacy", "Home");
+        }
+
         return View();
     }
-
     [HttpPost]
     public async Task<IActionResult> Login(
         string email,
         string password)
     {
         var user = _context.Users
-            .FirstOrDefault(x =>
-                x.Email == email &&
-                x.PasswordHash == password);
+            .FirstOrDefault(x => x.Email == email);
+        PasswordHasher<AppUser> hasher = new();
+        var result = hasher.VerifyHashedPassword(user, user.PasswordHash, password);
 
-        if(user == null)
+        if (user == null && result == PasswordVerificationResult.Failed)
         {
             ViewBag.Error = "Invalid Credentials";
 
@@ -40,8 +50,8 @@ public class AccountController:Controller
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, user.Name),
-            new Claim(ClaimTypes.Role, user.Role)
+            new (ClaimTypes.Name, user.Name),
+            new (ClaimTypes.Role, user.Role)
         };
 
         var identity = new ClaimsIdentity(
@@ -54,12 +64,12 @@ public class AccountController:Controller
                 .AuthenticationScheme,
             new ClaimsPrincipal(identity));
 
-        if(user.Role == "Admin")
+        if (user.Role == "Admin")
             return RedirectToAction("Index",
                                     "Employee");
 
-        return RedirectToAction("Dashboard",
-                                "EmployeePanel");
+        return RedirectToAction("Privacy",
+                                "Home");
     }
 
     public async Task<IActionResult> Logout()
@@ -102,6 +112,8 @@ public class AccountController:Controller
             // temporary
             PasswordHash = model.Password
         };
+        PasswordHasher<AppUser> hasher = new();
+        user.PasswordHash = hasher.HashPassword(user, model.Password);
 
         _context.Users.Add(user);
 

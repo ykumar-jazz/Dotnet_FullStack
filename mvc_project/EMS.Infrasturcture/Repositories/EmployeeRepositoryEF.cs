@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using mvc_project.EMS.Application.Interfaces;
 using mvc_project.EMS.Domain.Entities;
 using mvc_project.EMS.Infrastructure.Data;
-namespace mvc_projectEMS.Infrastructure.Repositories;
+namespace mvc_project.EMS.Infrastructure.Repositories;
 
 public class EmployeeRepositoryEF :IEmployeeRepository
 {
@@ -11,7 +11,7 @@ public class EmployeeRepositoryEF :IEmployeeRepository
     {
         _context=appDbContext;
     }
-    public async Task<List<Employee>>GetAllAsync()
+    public async Task<List<Employee>> GetAllAsync()
     {
         return await _context.Employees.ToListAsync();
     }

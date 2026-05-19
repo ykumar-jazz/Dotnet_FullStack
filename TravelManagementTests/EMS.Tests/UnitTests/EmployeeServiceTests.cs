@@ -15,13 +15,13 @@ public class EmployeeServiceTests
 
         mockRepo.Setup(x =>
             x.GetAllAsync())
-        .ReturnsAsync(new List<Employee>());
+        .ReturnsAsync([]);
 
         EmployeeService service =
             new(mockRepo.Object);
 
         var result = await service.GetAllAsync();
 
-        Assert.NotNull(result);
+        Assert.NotEmpty(result);
     }
 }
